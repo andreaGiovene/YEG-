@@ -1,4 +1,4 @@
-package cloud.yeg.factorystudios.congresso.model;
+package factorystudios.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
