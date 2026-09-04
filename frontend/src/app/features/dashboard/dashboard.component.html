@@ -1,0 +1,47 @@
+<div class="pagina">
+
+  <!-- Filtro globale: agisce su tutte e tre le viste sotto (punto 4.3) -->
+  <div class="card filtri">
+    <label>
+      Canale di ingaggio:
+      <select [(ngModel)]="canaleSelezionato" (ngModelChange)="onFiltroCambiato()">
+        <option value="">Tutti</option>
+        <option *ngFor="let c of canaliDisponibili" [value]="c">{{ c }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="card">
+    <h2>Funnel del percorso</h2>
+    <div *ngIf="caricamentoFunnel" class="stato-caricamento">Caricamento...</div>
+    <div *ngIf="erroreFunnel && !caricamentoFunnel" class="stato-errore">{{ erroreFunnel }}</div>
+    <div *ngIf="!caricamentoFunnel && !erroreFunnel && !datiFunnel" class="stato-vuoto">Nessun dato per questo filtro.</div>
+    <canvas *ngIf="!caricamentoFunnel && !erroreFunnel && datiFunnel" baseChart
+            [data]="datiFunnel" type="bar" [options]="opzioniGrafico"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Confronto per dimensione anagrafica</h2>
+    <label>
+      Dimensione:
+      <select [(ngModel)]="dimensioneSelezionata" (ngModelChange)="onDimensioneCambiata()">
+        <option *ngFor="let d of dimensioniDisponibili" [value]="d.valore">{{ d.etichetta }}</option>
+      </select>
+    </label>
+    <div *ngIf="caricamentoConfronto" class="stato-caricamento">Caricamento...</div>
+    <div *ngIf="erroreConfronto && !caricamentoConfronto" class="stato-errore">{{ erroreConfronto }}</div>
+    <div *ngIf="!caricamentoConfronto && !erroreConfronto && !datiConfronto" class="stato-vuoto">Nessun dato per questo filtro.</div>
+    <canvas *ngIf="!caricamentoConfronto && !erroreConfronto && datiConfronto" baseChart
+            [data]="datiConfronto" type="bar" [options]="opzioniGrafico"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Andamento per giornata</h2>
+    <div *ngIf="caricamentoAndamento" class="stato-caricamento">Caricamento...</div>
+    <div *ngIf="erroreAndamento && !caricamentoAndamento" class="stato-errore">{{ erroreAndamento }}</div>
+    <div *ngIf="!caricamentoAndamento && !erroreAndamento && !datiAndamento" class="stato-vuoto">Nessun dato per questo filtro.</div>
+    <canvas *ngIf="!caricamentoAndamento && !erroreAndamento && datiAndamento" baseChart
+            [data]="datiAndamento" type="line" [options]="opzioniGrafico"></canvas>
+  </div>
+
+</div>
