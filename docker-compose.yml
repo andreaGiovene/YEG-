@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: congresso
+      POSTGRES_USER: congresso
+      POSTGRES_PASSWORD: congresso
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U congresso -d congresso"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Job una tantum: carica il dataset nel database appena questo è pronto,
+  # poi esce. Il backend parte solo dopo che il caricamento è completato.
+  etl:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: congresso
+      DB_USER: congresso
+      DB_PASSWORD: congresso
+    volumes:
+      - ./data:/data:ro
+    entrypoint: ["java", "-jar", "app.jar",
+                 "--spring.profiles.active=etl",
+                 "--dataset=/data/Dataset_Evento_Congresso_2025.xlsx"]
+
+  backend:
+    build: ./backend
+    depends_on:
+      etl:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: congresso
+      DB_USER: congresso
+      DB_PASSWORD: congresso
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  db-data:
